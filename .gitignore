@@ -1,0 +1,7 @@
+*.csv
+*.synctex.*
+report.* 
+!report.pdf
+!report.TeX
+*.joblib
+*.pyc

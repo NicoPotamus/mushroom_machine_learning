@@ -7,6 +7,12 @@
 \usepackage{ulem}
 \usepackage{subfig}
 \usepackage{float}
+% Better float control and barriers
+\usepackage{placeins}
+% Allow LaTeX to place more floats on pages
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.7}
 
 \begin{document}
 
@@ -60,54 +66,109 @@ Email: demilion1@newpaltz.edu}
 \end{itemize}
 
 \subsection{Evaluation Metrics}
-Model performance was evaluated using multiple metrics and visualizations to provide comprehensive assessment. Each model was evaluated on accuracy, precision, recall, F1-score, Mean Squared Error (MSE), and Area Under the ROC Curve (AUC). Confusion matrices visualize classification performance by showing true positives, true negatives, false positives, and false negatives for each model (Figures~\ref{fig:log_confusion}, \ref{fig:lin_confusion}, \ref{fig:nb_confusion}). Receiver Operating Characteristic (ROC) curves plot the true positive rate against the false positive rate across all classification thresholds (Figures~\ref{fig:log_roc}, \ref{fig:lin_roc}, \ref{fig:nb_roc}).
+Model performance was evaluated using multiple metrics and visualizations to provide comprehensive assessment. Each model was evaluated on accuracy, precision, recall, F1-score, Mean Squared Error (MSE), and Area Under the ROC Curve (AUC). Confusion matrices visualize classification performance by showing true positives, true negatives, false positives, and false negatives for each model. 
 
-\begin{figure}[!h]
+The ROC curve shows the true positive (TPR) rate for reach false positive rate (FPR), of which you can take the integral of the TPR with respect of FPR to get the area under curve. This allows to see how the model variably ranks positive scores to negative. Its a way of seeing different threshholds, in otherwords how does one trade off with the other. Which is why the top left of corner of the graph is the sweet spot for the curve, it shows if we can have a high true rate with a low negative rate. However, this method of evaluation ignores model calibration and absolute score values. Therefore we must use other forms of calibrated metrics for a complete idea.
+
+The confusion matrix for Logisic Regression above summarizes where the model's flaws would be, in the context of actual edibility of the mushroom and the model's prediction for each test sample respectively.
+
+The feature plot is used to get an inside peek to understand how the model is using each feature in relation to it's output. We get an inside peek on each feature using coefficients as the metric, it basically provides the weight of each feature.
+
+
+\section{Results}
+
+TODO: IMPLIMENT precision and recall and F-measure
+\subsection{Logisitic Regression}
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.45\textwidth]{images/logConf.png}
 \caption{Confusion Matrix for Logistic Regression.}
 \label{fig:log_confusion}
 \end{figure}
+\FloatBarrier
 
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.45\textwidth]{images/linConf.png}
-\caption{Confusion Matrix for Linear Regression.}
-\label{fig:lin_confusion}
-\end{figure}
+Since True Positive and True Negative values completely made up the testing output, it can be assumed that the model is vary capable of class separation (the model has a clear sense which features are influential over output). However, the results being literally perfect tell us that we should be checking for data leakage or duplicated rows which could be the reason this is we are getting these results. Otherwise the features are just simple to predict.
 
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.45\textwidth]{images/naiveBayesConf.png}
-\caption{Confusion Matrix for Naïve Bayes.}
-\label{fig:nb_confusion}
-\end{figure}
-
-\begin{figure}[!h]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.5\textwidth]{images/logRoc.png}
 \caption{ROC curve with AUC score for Logistic Regression.}
 \label{fig:log_roc}
 \end{figure}
+\FloatBarrier
 
-\begin{figure}[!h]
+The area under curve is a 1 meaning that we can have a perfect model with no false positives with maximum true positives. Given that this seems too good to be true we must check the other metrics.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{images/logFeatures.png}
+\caption{Log feature weights}
+\label{fig:log_features}
+\end{figure}
+\FloatBarrier
+
+All this chart is showing is that the categories odor, spore print, population, gill size, and stalk root have is what are mainly considered when predicting edibility. You can notice this by taking account of how many instances of each feature are present. Additionally, we can see that odor is the main contributor for declaring a mushroom poisonous. This is deduced from the majority of the red values being associated with the various odor categories. Whereas edible mushroom predictions take more into acc
+
+\subsection{Linear Regression}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.45\textwidth]{images/linConf.png}
+\caption{Confusion Matrix for Linear Regression.}
+\label{fig:lin_confusion}
+\end{figure}
+\FloatBarrier
+The confusion Matrix for the linear regression baseline is supposed to show where the regression to threshold method fails for categorical classification. However, in this case it seems to score just as well as logistic regression. This can be due to data leakage when training, or the simplicity of the dataset. 
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.5\textwidth]{images/linRoc.png}
 \caption{ROC curve with AUC score for Linear Regression.}
 \label{fig:lin_roc}
 \end{figure}
+\FloatBarrier
+Given that the confusion matrix was a perfect output, it is a bit redundant to provide the ROC curve. However, just to cover all points we see that it also scored perfectly indicating to look at the other calibrated metrics.
 
-\begin{figure}[!h]
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{images/linFeatures.png}
+\caption{Linear model feature coefficients (weights).}
+\label{fig:lin_features}
+\end{figure}
+\FloatBarrier
+As seen in the figure above we notice that the model scored the features very similarly with a slight change in weights. This aids in consistency about the features of the dataset being simple to predict. There is a commonality with scoreing features like odor, spore print color, and stalk roots having heavier weights for prediction.
+
+\subsection{Naïve Bayes}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{images/naiveBayesConf.png}
+\caption{Confusion Matrix for Naïve Bayes feature}
+\label{fig:nb_features}
+\end{figure}
+\FloatBarrier
+
+The confusion matrix for the Naïve Bayes model was the only one that had any false negatives. This shows that this model doesn't have perfect accuracy, but pretty darn close. This matix highlights that the model is more prone to give false negatives which isn't the worst. We'd rather have false negatives over false positives in the implementation due to the use case. We don't want a user to trust the machine full heartedly and eat a poisonous mushroom just becuase it was predected to be edible. For the safety of the user it is better to have false negatives for the idea that a mushroom could be poisonous so why take the chance eating itwhen you don't have to do so.
+
+\subsection{Naïve Bayes}
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.5\textwidth]{images/naiveBayesRoc.png}
-\caption{ROC curve with AUC score for Naïve Bayes.}
-\label{fig:nb_roc}
+\caption{ROC curve with AUC score Naïve Bayes feature}
+\label{fig:nb_features}
 \end{figure}
+\FloatBarrier
 
-\clearpage
+The area unde the ROC curve is 0.997, this shows that the model is borderline perfect. Although the graph doesn't quite capture it the there is a small space to above the line on the left side which is encapsulating the error. Even though we see a very accurate model, this doesn't mean that the ignoration of the calibrated metrics won't impact this finding.
 
-\section{Results}
-TODO: Implement
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{images/naiveBayesFeatures.png}
+\caption{Naïve Bayes feature importances (class-conditional differences).}
+\label{fig:nb_features}
+\end{figure}
+\FloatBarrier
+
+The figure above shows the features taken into account independently as per the Naïve Bayes assumption of features, therefore we use feature conditional statistics to show the feature weights. This is done via the mean difference between poisonous and edible for each feature. Diving into the data shown, we see that the same features are weighted heavier similar to the other two machine learning models implemented. The features weighted heaviest are odor, spore print color, and stalk shape. This commonality really drives home that these features have the most to do with a mushrooms edibility.
+
 
 
 \section{Conclusion}
